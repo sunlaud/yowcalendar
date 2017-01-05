@@ -1,0 +1,95 @@
+.root{
+    -fx-font-size: 16pt;
+    -fx-font-family: "Courier New";
+    -fx-background: white;
+}
+
+
+.date-picker-popup {
+    -fx-background-color: transparent;
+    -fx-background-insets: 1;
+    /*-fx-background-radius: 0 6 6 6, 0 5 5 5;*/
+    -fx-background-radius: 0;
+    -fx-padding: 0;
+    -fx-alignment: CENTER; /* VBox */
+    -fx-spacing: 0; /* VBox */
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 8, 0.0 , 0 , 0 );
+}
+.date-picker-popup > .month-year-pane {
+    -fx-padding: 0.5em; /* 6 6 6 6 */
+    -fx-background-color: -fx-outer-border, #ff0000, -fx-body-color;
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 0;
+}
+
+.date-picker-popup > .month-year-pane {
+/*    visibility: hidden;
+    height: 0;*/
+}
+.date-picker-popup > .month-year-pane > * > .button {
+    visibility: hidden;
+}
+.date-picker-popup > .calendar-grid {
+    -fx-background-color: transparent;
+    -fx-background-insets: 1;
+}
+
+
+.date-picker-popup > * > .date-cell {
+    -fx-background-color: transparent;
+    -fx-background-insets: 1;
+    -fx-padding: 0.166667em;
+    -fx-alignment: BASELINE_CENTER;
+    -fx-opacity: 1.0;
+}
+
+.date-picker-popup > * > .day-name-cell,
+.date-picker-popup > * > .week-number-cell {
+    -fx-font-size: 1em;
+}
+
+
+
+.date-picker-popup > * > .day-cell {
+    -fx-padding: 0.333333em 0.583333em 0.333333em 0.583333em; /* 4 7 4 7 */
+    -fx-border-color: derive(-fx-control-inner-background,-10%);
+    -fx-border-width: 1px;
+    -fx-background: -fx-control-inner-background;
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.date-picker-popup > * > *:focused,
+.date-picker-popup > * > .today,
+.date-picker-popup > * > *:hover,
+.date-picker-popup > * > .selected {
+    -fx-background-color: transparent;
+    -fx-background: -fx-control-inner-background;
+}
+
+/*.date-picker-popup > * > .previous-month.today,
+.date-picker-popup > * > .next-month.today,
+.date-picker-popup > * > .previous-month.selected,
+.date-picker-popup > * > .next-month.selected,*/
+.date-picker-popup > * > .previous-month,
+.date-picker-popup > * > .next-month {
+    visibility: hidden;
+}
+
+
+
+.date-picker-popup > * > .day-cell.weekend {
+    -fx-text-fill: #0000ff;
+}
+
+.date-picker-popup > * > .day-cell.holiday,
+.date-picker-popup > * > .day-cell.weekend.holiday {
+    -fx-text-fill: #ee0000;
+    -fx-font-weight: 600;
+}
+
+
+
+
+
+
