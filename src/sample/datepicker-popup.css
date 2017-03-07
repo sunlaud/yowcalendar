@@ -1,95 +1,80 @@
 .root{
     -fx-font-size: 16pt;
     -fx-font-family: "Courier New";
-    -fx-background: white;
+    -fx-background: #666;
 }
 
 
-.date-picker-popup {
-    -fx-background-color: transparent;
-    -fx-background-insets: 1;
-    /*-fx-background-radius: 0 6 6 6, 0 5 5 5;*/
-    -fx-background-radius: 0;
-    -fx-padding: 0;
+/* --------- datepicker's calendar-grid styles ------------- */
+/* copied from caspian theme and tweaked, default styles do not apply
+ coz they rely on .date-picker-popup parent, which is not present in scene*/
+
+
+.calendar-grid {
+    -fx-padding: 0.5em;
     -fx-alignment: CENTER; /* VBox */
     -fx-spacing: 0; /* VBox */
-    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 8, 0.0 , 0 , 0 );
-}
-.date-picker-popup > .month-year-pane {
-    -fx-padding: 0.5em; /* 6 6 6 6 */
-    -fx-background-color: -fx-outer-border, #ff0000, -fx-body-color;
-    -fx-background-insets: 0, 1, 2;
-    -fx-background-radius: 0;
 }
 
-.date-picker-popup > .month-year-pane {
-/*    visibility: hidden;
-    height: 0;*/
-}
-.date-picker-popup > .month-year-pane > * > .button {
-    visibility: hidden;
-}
-.date-picker-popup > .calendar-grid {
-    -fx-background-color: transparent;
-    -fx-background-insets: 1;
-}
-
-
-.date-picker-popup > * > .date-cell {
-    -fx-background-color: transparent;
-    -fx-background-insets: 1;
-    -fx-padding: 0.166667em;
+.date-cell {
+    -fx-padding: 0.4em;
     -fx-alignment: BASELINE_CENTER;
-    -fx-opacity: 1.0;
 }
 
-.date-picker-popup > * > .day-name-cell,
-.date-picker-popup > * > .week-number-cell {
-    -fx-font-size: 1em;
+.day-name-cell {
+    -fx-font-style: italic;
 }
 
-
-
-.date-picker-popup > * > .day-cell {
-    -fx-padding: 0.333333em 0.583333em 0.333333em 0.583333em; /* 4 7 4 7 */
-    -fx-border-color: derive(-fx-control-inner-background,-10%);
+.day-cell {
+    -fx-padding: 0.4em 0.5em;
+    -fx-border-color: derive(-fx-control-inner-background,-20%);
     -fx-border-width: 1px;
-    -fx-background: -fx-control-inner-background;
-    -fx-background-color: transparent;
-    -fx-text-fill: -fx-text-background-color;
+    -fx-font-style: normal;
 }
 
-.date-picker-popup > * > *:focused,
-.date-picker-popup > * > .today,
-.date-picker-popup > * > *:hover,
-.date-picker-popup > * > .selected {
-    -fx-background-color: transparent;
-    -fx-background: -fx-control-inner-background;
-}
-
-/*.date-picker-popup > * > .previous-month.today,
-.date-picker-popup > * > .next-month.today,
-.date-picker-popup > * > .previous-month.selected,
-.date-picker-popup > * > .next-month.selected,*/
-.date-picker-popup > * > .previous-month,
-.date-picker-popup > * > .next-month {
+.previous-month,
+.next-month {
     visibility: hidden;
 }
 
+/* --------- custom classes ----------- */
 
 
-.date-picker-popup > * > .day-cell.weekend {
+.day-cell.weekend {
     -fx-text-fill: #0000ff;
 }
 
-.date-picker-popup > * > .day-cell.holiday,
-.date-picker-popup > * > .day-cell.weekend.holiday {
+.day-cell.holiday,
+.day-cell.weekend.holiday {
     -fx-text-fill: #ee0000;
     -fx-font-weight: 600;
 }
 
+.month-calendar {
+    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-background-insets: 1;
+    /*-fx-background-radius: 0 6 6 6, 0 5 5 5;*/
+    -fx-background-radius: 3em;
+    -fx-padding: 0.7em;
+    -fx-alignment: CENTER; /* VBox */
+    -fx-spacing: 0.5em; /* VBox */
+    -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.7), 3em, 0.73 , 0 , 0 );
+}
 
+.month-calendar .label {
+    -fx-font-weight: 600;
+    -fx-font-size: 1.2em;
+    /*-fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.4) , 2, 0.7 , 0 , 0 );*/
+    -fx-text-fill: #000;
 
+}
 
+.year-label {
+    -fx-font-weight: 600;
+    -fx-font-size: 5em;
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 2em, 0.7 , 0 , 0 );
+    -fx-text-fill: rgba(255,255,255,0.9);
+	-fx-padding: 2em 5em;
+}
 
 
