@@ -1,4 +1,4 @@
-package sample;
+package io.github.sunlaud.yowcalendar;
 
 import com.sun.javafx.scene.control.skin.DatePickerSkin;
 import javafx.application.Application;
@@ -17,7 +17,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.converter.DoubleStringConverter;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -30,7 +29,7 @@ import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.*;
 
-import static sample.Main.Arragement.RECTANGULAR_FIRST_DOWN;
+import static io.github.sunlaud.yowcalendar.Main.Arragement.RECTANGULAR_FIRST_DOWN;
 
 public class Main extends Application {
     public static final String OUT_IMAGE_FILENAME = "/tmp/calendar_grid.png";
@@ -92,13 +91,11 @@ public class Main extends Application {
                     SnapshotParameters snapshotParameters = new SnapshotParameters();
                     snapshotParameters.setFill(Color.TRANSPARENT);
                     Platform.runLater(() -> {
+                        double oldScaleX = scale.getX();
+                        double oldScaleY = scale.getY();
                         try {
-                            double oldScaleX = scale.getX();
-                            double oldScaleY = scale.getY();
                             scaleToFit(calendarPane, scale, DESIRED_IMG_WIDTH, DESIRED_IMG_HEIGHT);
                             WritableImage snapshot = calendarPane.snapshot(snapshotParameters, null);
-                            scale.setX(oldScaleX);
-                            scale.setY(oldScaleY);
                             System.out.println("got snapshot, saving...");
                             File file = new File(OUT_IMAGE_FILENAME);
                             ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
@@ -107,9 +104,11 @@ public class Main extends Application {
                             System.out.println("scaleY: " + calendarPane.getScaleY());
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } finally {
+                            scale.setX(oldScaleX);
+                            scale.setY(oldScaleY);
                         }
                     });
-
                     return null;
                 }
             };
@@ -173,7 +172,6 @@ public class Main extends Application {
             double scaleDelta = 0.1 * (event.getDeltaY() < 0 ? -1 : 1);
             scale.setX(Double.max(scale.getX() + scaleDelta, minScale));
             scale.setY(Double.max(scale.getY() + scaleDelta, minScale));
-
         });
 
         reloadCssBtn.setOnAction((ActionEvent event) -> reloadStyles(scene));
