@@ -11,6 +11,7 @@ You can than overlay it over any image of you choice in any graphical editor of 
 
 ## Prerequisites
 - Java 8 JDK with JavaFX (JavaFX is bundled with Oracle JDK 8 and should be installed as a separate installable package (OpenJFX) for OpenJDK)
+- IDE with lombok plugin
 
 ## Usage
 For now app is launched straight from IDE and configured by editing source code (see Main class for details).
