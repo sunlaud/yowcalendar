@@ -1,6 +1,7 @@
 package io.github.sunlaud.yowcalendar;
 
 import com.sun.javafx.scene.control.skin.DatePickerSkin;
+import io.github.sunlaud.yowcalendar.holiday.WorkingDaysCalculator;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -9,10 +10,22 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.*;
-import javafx.scene.control.*;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
+import javafx.scene.control.DateCell;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
@@ -22,19 +35,24 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.TextStyle;
-import java.util.*;
+import java.util.Locale;
 
 import static io.github.sunlaud.yowcalendar.Main.Arragement.RECTANGULAR_FIRST_DOWN;
 
 public class Main extends Application {
     public static final String OUT_IMAGE_FILENAME = "/tmp/calendar_grid.png";
     public static final int COLUMNS_IN_CALENDAR = 6;
-    public static final Arragement arragement = Arragement.CORNER_LEFT_BOTTOM;
+    public static final Arragement arrangement = Arragement.CORNER_LEFT_BOTTOM;
     //width & height are limited by texture size of videocard or/and bugs in javafx
     //need to reduce size if exception "Requested texture dimensions (14676x18759) require dimensions (14676x0) that exceed
     //maximum texture size (16384)" is thrown. Workaround as switching to software render using option -Dprism.order=sw
@@ -50,7 +68,7 @@ public class Main extends Application {
     }
 
     private static final int YEAR = LocalDate.now().getYear();
-    private final Map<LocalDate, String> holidays = getHolidays(YEAR);
+    private final WorkingDaysCalculator workingDaysCalculator = new WorkingDaysCalculator(YEAR);
 
     private final Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
         public DateCell call(final DatePicker datePicker) {
@@ -63,7 +81,7 @@ public class Main extends Application {
                     if (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY) {
                         getStyleClass().add("weekend");
                     }
-                    if (isHoliday(item)) {
+                    if (workingDaysCalculator.isHoliday(item)) {
                         getStyleClass().add("holiday");
                     }
                 }
@@ -72,7 +90,7 @@ public class Main extends Application {
     };
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         Scale scale = new Scale();
 
 
@@ -220,7 +238,7 @@ public class Main extends Application {
         calendarPane.setVgap(20);
 
         int rowsCount;
-        switch (arragement) {
+        switch (arrangement) {
             case CORNER_LEFT_BOTTOM:
                 rowsCount = 12 - colsCount + 1;
                 for (int i = 0; i < rowsCount; i++) {
@@ -235,16 +253,18 @@ public class Main extends Application {
 
             case RECTANGULAR_FIRST_DOWN:
             case RECTANGULAR_FIRST_RIGHT:
-            default:
                 rowsCount = 12 / colsCount;
                 for (int i = 0; i < 12; i++) {
                     Node popupContent = getMonthCalendarNode(i);
-                    if (arragement == RECTANGULAR_FIRST_DOWN) {
+                    if (arrangement == RECTANGULAR_FIRST_DOWN) {
                         calendarPane.add(popupContent, i / rowsCount, i % rowsCount);
                     } else {
                         calendarPane.add(popupContent, i % colsCount, i / colsCount);
                     }
                 }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected arrangement: " + arrangement);
         }
         Label yearLabel = new Label(String.valueOf(YEAR));
         yearLabel.getStyleClass().add("year-label");
@@ -267,40 +287,6 @@ public class Main extends Application {
         dump(monthCal);
         return monthCal;
 //        return popupContent;
-    }
-
-    private boolean isHoliday(LocalDate day) {
-        if (holidays.containsKey(day)) {
-            return true;
-        }
-        //FIXME error lurks here if several holidays fall to same weekend
-        //TODO pre-calculate non-working days in advance: both faster and correct
-        if (day.getDayOfWeek() == DayOfWeek.MONDAY) {
-            return holidays.containsKey(day.minusDays(1)) || holidays.containsKey(day.minusDays(2));
-        }
-        if (day.getDayOfWeek() == DayOfWeek.TUESDAY) {
-            return holidays.containsKey(day.minusDays(1)) && holidays.containsKey(day.minusDays(2));
-        }
-        return false;
-    }
-
-    private Map<LocalDate, String> getHolidays(int year) {
-        Map<LocalDate, String> holidays = new HashMap<>();
-        holidays.put(LocalDate.of(year, Month.JANUARY, 1), "Новий рік");
-        holidays.put(LocalDate.of(year, Month.JANUARY, 7), "Різдво Христове");
-        holidays.put(LocalDate.of(year, Month.MARCH, 8), "Міжнародний жіночий день");
-        //TODO calculate easter
-        LocalDate easter = LocalDate.of(year, Month.APRIL, 16);  //"змінне"
-        holidays.put(easter, "Пасха (Великдень)");
-        LocalDate trinity = easter.plusDays(49); //"змінне: Великдень + 49 днів"
-        holidays.put(trinity, "Трійця");
-        holidays.put(LocalDate.of(year, Month.MAY, 1), "День міжнародної солідарності трудящих");
-        holidays.put(LocalDate.of(year, Month.MAY, 2), "День міжнародної солідарності трудящих");
-        holidays.put(LocalDate.of(year, Month.MAY, 9), "День перемоги над нацизмом у Другій світовій війні");
-        holidays.put(LocalDate.of(year, Month.JUNE, 28), "День Конституції України");
-        holidays.put(LocalDate.of(year, Month.AUGUST, 24), "День Незалежності України");
-        holidays.put(LocalDate.of(year, Month.OCTOBER, 14), "День захисника України");
-        return Collections.unmodifiableMap(holidays);
     }
 
     /** dump node content to console for debug */
