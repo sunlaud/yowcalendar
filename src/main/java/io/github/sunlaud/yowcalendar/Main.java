@@ -30,6 +30,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -49,6 +50,7 @@ import java.util.Locale;
 
 import static io.github.sunlaud.yowcalendar.Main.Arragement.RECTANGULAR_FIRST_DOWN;
 
+@Slf4j
 public class Main extends Application {
     public static final String OUT_IMAGE_FILENAME = "/tmp/calendar_grid.png";
     public static final int COLUMNS_IN_CALENDAR = 6;
@@ -114,12 +116,12 @@ public class Main extends Application {
                         try {
                             scaleToFit(calendarPane, scale, DESIRED_IMG_WIDTH, DESIRED_IMG_HEIGHT);
                             WritableImage snapshot = calendarPane.snapshot(snapshotParameters, null);
-                            System.out.println("got snapshot, saving...");
+                            log.info("got snapshot, saving...");
                             File file = new File(OUT_IMAGE_FILENAME);
                             ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
-                            System.out.println("Saved snapshot to " + file);
-                            System.out.println("scaleX: " + calendarPane.getScaleX());
-                            System.out.println("scaleY: " + calendarPane.getScaleY());
+                            log.info("Saved snapshot to {}", file);
+                            log.info("scaleX: {}", calendarPane.getScaleX());
+                            log.info("scaleY: {}", calendarPane.getScaleY());
                         } catch (IOException e) {
                             e.printStackTrace();
                         } finally {
@@ -132,7 +134,7 @@ public class Main extends Application {
             };
 
             EventHandler<WorkerStateEvent> doneRendering = e -> {
-                System.out.println("done: " + e.getEventType() + ", exception: " + e.getSource().getException());
+                log.info("done: {}, exception: {}", e.getEventType(), e.getSource().getException());
                 renderBtn.setDisable(false);
                 renderBtn.setCursor(Cursor.DEFAULT);
             };
@@ -221,13 +223,13 @@ public class Main extends Application {
         stylesheets.clear();
         URL cssUrl = getClass().getResource("datepicker-calendar-grid.css");
         stylesheets.add(cssUrl.toExternalForm());
-        System.out.println("css reloaded");
+        log.info("css reloaded");
     }
 
 
     public static void main(String[] args) {
         Locale locale = Locale.forLanguageTag("uk-UA");
-        System.out.println("locale=" + locale);
+        log.info("locale={}", locale);
         Locale.setDefault(locale);
         launch(args);
     }
@@ -308,23 +310,23 @@ public class Main extends Application {
 
 
     private void watchCssChange(Path cssFilePath, Scene scene) {
-        System.out.println("watching for file changes: " + cssFilePath);
+        log.info("watching for file changes: {}", cssFilePath);
         Path watchedDir = cssFilePath.getParent();
         Path watchedFileName = cssFilePath.getFileName();
         Task<Void> watchTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 try (final WatchService watchService = FileSystems.getDefault().newWatchService()) {
-                    System.out.println("watching for changes in dir: " + watchedDir);
+                    log.info("watching for changes in dir: {}", watchedDir);
                     watchedDir.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
                     while (true) {
                         final WatchKey wk = watchService.take();
                         for (WatchEvent<?> event : wk.pollEvents()) {
                             //we only register "ENTRY_MODIFY" so the context is always a Path.
                             final Path changedFilename = (Path) event.context();
-                            System.out.println(changedFilename);
+                            log.debug("changed: {}", changedFilename);
                             if (changedFilename.toString().startsWith(watchedFileName.toString())) {
-                                System.out.println("looks like CSS file has changed");
+                                log.info("looks like CSS file has changed");
                                 Platform.runLater(() -> reloadStyles(scene));
                             }
                         }
