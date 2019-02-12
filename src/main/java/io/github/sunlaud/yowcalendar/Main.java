@@ -101,51 +101,45 @@ public class Main extends Application {
 
         final Button renderBtn = new Button("Save calendar image");
         renderBtn.setOnAction((ActionEvent event) -> {
-            renderBtn.setDisable(true);
-            renderBtn.setCursor(Cursor.WAIT);
-
-
-            Task renderImageTask = new Task() {
-                @Override
-                protected Object call() throws Exception {
-                    SnapshotParameters snapshotParameters = new SnapshotParameters();
-                    snapshotParameters.setFill(Color.TRANSPARENT);
-                    Platform.runLater(() -> {
-                        double oldScaleX = scale.getX();
-                        double oldScaleY = scale.getY();
-                        try {
-                            scaleToFit(calendarPane, scale, DESIRED_IMG_WIDTH, DESIRED_IMG_HEIGHT);
-                            WritableImage snapshot = calendarPane.snapshot(snapshotParameters, null);
-                            log.info("got snapshot, saving...");
-                            File file = new File(OUT_IMAGE_FILENAME);
-                            ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
-                            log.info("Saved snapshot to {}", file);
-                            log.info("scaleX: {}", calendarPane.getScaleX());
-                            log.info("scaleY: {}", calendarPane.getScaleY());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            scale.setX(oldScaleX);
-                            scale.setY(oldScaleY);
-                        }
-                    });
-                    return null;
-                }
-            };
-
-            EventHandler<WorkerStateEvent> doneRendering = e -> {
-                log.info("done: {}, exception: {}", e.getEventType(), e.getSource().getException());
-                renderBtn.setDisable(false);
-                renderBtn.setCursor(Cursor.DEFAULT);
-            };
-            renderImageTask.setOnSucceeded(doneRendering);
-            renderImageTask.setOnFailed(doneRendering);
-            renderImageTask.setOnCancelled(doneRendering);
-
-
-            Thread th = new Thread(renderImageTask);
-            th.setDaemon(true);
-            th.start();
+            log.info("saving...");
+            double oldScaleX = scale.getX();
+            double oldScaleY = scale.getY();
+            try {
+                renderBtn.setDisable(true);
+                renderBtn.setCursor(Cursor.WAIT);
+                scaleToFit(calendarPane, scale, DESIRED_IMG_WIDTH, DESIRED_IMG_HEIGHT);
+                SnapshotParameters snapshotParameters = new SnapshotParameters();
+                snapshotParameters.setFill(Color.TRANSPARENT);
+                log.info("before snapshotting...");
+                final WritableImage snapshot = calendarPane.snapshot(snapshotParameters, null);
+                log.info("scaleX: {}", calendarPane.getScaleX());
+                log.info("scaleY: {}", calendarPane.getScaleY());
+                log.info("got snapshot, saving...");
+                Task<Void> renderImageTask = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        log.info("saving snapshot to file {}", OUT_IMAGE_FILENAME);
+                        File file = new File(OUT_IMAGE_FILENAME);
+                        ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
+                        log.info("Saved snapshot to {}", file);
+                        return null;
+                    }
+                };
+                EventHandler<WorkerStateEvent> doneRendering = e -> {
+                    log.info("done: {}, exception: {}", e.getEventType(), e.getSource().getException());
+                    renderBtn.setDisable(false);
+                    renderBtn.setCursor(Cursor.DEFAULT);
+                };
+                renderImageTask.setOnSucceeded(doneRendering);
+                renderImageTask.setOnFailed(doneRendering);
+                renderImageTask.setOnCancelled(doneRendering);
+                Thread th = new Thread(renderImageTask);
+                th.setDaemon(true);
+                th.start();
+            } finally {
+                scale.setX(oldScaleX);
+                scale.setY(oldScaleY);
+            }
         });
 
         VBox root = new VBox();
