@@ -27,7 +27,7 @@ class WorkingDaysCalculatorTest {
             "2021-05-01 = true", //labor day
             "2021-05-02 = true", //easter
             "2021-05-03 = true", //easter
-            "2021-05-04 = false", //seems that if both weekends are holidays, only monday is non-working day, but not tuesday
+            "2021-05-04 = true", //if both weekends are holidays, tuesday is non-working day (as well as monday)
     })
     @ParameterizedTest
     void checksIfWorkingDay(String dateAsString, boolean expectedIsWorkingDay) {

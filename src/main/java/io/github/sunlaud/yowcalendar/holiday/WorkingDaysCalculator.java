@@ -28,13 +28,12 @@ public class WorkingDaysCalculator {
             return true;
         }
         //TODO pre-calculate non-working days in advance: both faster and correct
-        //seems that if both weekends are holidays, only monday is non-working day, but not tuesday
-        //if multiple holidays fall to same weekend day, we've got only one day off, not two
         if (day.getDayOfWeek() == DayOfWeek.MONDAY) {
             return holidays.containsKey(day.minusDays(1)) || holidays.containsKey(day.minusDays(2));
         }
+        //if both weekends are holidays, tuesday is non-working day (as well as monday)
         if (day.getDayOfWeek() == DayOfWeek.TUESDAY) {
-            return holidays.containsKey(day.minusDays(1)) && holidays.containsKey(day.minusDays(2));
+            return holidays.containsKey(day.minusDays(3)) && holidays.containsKey(day.minusDays(2));
         }
         return false;
     }
