@@ -60,8 +60,14 @@ public class Main extends Application {
     //maximum texture size (16384)" is thrown. Workaround as switching to software render using option -Dprism.order=sw
     //doesn't work: another exception is thrown: "Unrecognized image loader: null"
     //to print config: -Dprism.verbose=true
-    public static final int DESIRED_IMG_WIDTH = 7016 ;/*9888 - 150;*/
-    public static final int DESIRED_IMG_HEIGHT = 9933;/*13997 - 150;*/
+    //A1 @ 300DPI
+//    public static final int DESIRED_IMG_WIDTH = 7016 ;/*9888 - 150;*/
+//    public static final int DESIRED_IMG_HEIGHT = 9933;/*13997 - 150;*/
+
+    //A1 @ 400DPI
+    public static final int DESIRED_IMG_WIDTH = 9354;
+    public static final int DESIRED_IMG_HEIGHT = 13244;
+
 
     public enum Arragement {
         RECTANGULAR_FIRST_DOWN,
