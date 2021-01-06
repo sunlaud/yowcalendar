@@ -49,7 +49,7 @@ public class WorkingDaysCalculator {
         holidays.put(LocalDate.of(year, Month.MAY, 9), "День перемоги над нацизмом у Другій світовій війні");
         holidays.put(LocalDate.of(year, Month.JUNE, 28), "День Конституції України");
         holidays.put(LocalDate.of(year, Month.AUGUST, 24), "День Незалежності України");
-        holidays.put(LocalDate.of(year, Month.OCTOBER, 14), "День захисника України");
+        holidays.put(LocalDate.of(year, Month.OCTOBER, 14), "День захисників України");
         holidays.put(LocalDate.of(year, Month.DECEMBER, 25), "Різдво Христове");
 
         //"variable" holidays
